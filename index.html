@@ -9,10 +9,430 @@
     <!-- Google Fonts for Classical Document Typography (Exact PDF Replica) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Pure CSS Stylesheet -->
+    <!-- External Stylesheet -->
     <link rel="stylesheet" href="./style.css">
+
+    <!-- Embedded CSS for Instant Zero-Dependency Rendering -->
+    <style>
+      :root {
+        --app-bg: #e2e8f0;
+        --paper-bg: #ffffff;
+        --text-color: #111827;
+        --text-muted: #374151;
+        --link-color: #0f172a;
+        --link-hover: #2563eb;
+        --border-color: #cbd5e1;
+        --toolbar-bg: #ffffff;
+        --toolbar-border: #e2e8f0;
+        --toolbar-text: #1e293b;
+        --shadow-paper: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.06);
+        --font-serif: "EB Garamond", "Computer Modern Serif", "Times New Roman", Times, "Latin Modern Roman", Georgia, serif;
+        --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      [data-theme="dark"] {
+        --app-bg: #0f172a;
+        --paper-bg: #1e293b;
+        --text-color: #f8fafc;
+        --text-muted: #cbd5e1;
+        --link-color: #93c5fd;
+        --link-hover: #60a5fa;
+        --border-color: #334155;
+        --toolbar-bg: #1e293b;
+        --toolbar-border: #334155;
+        --toolbar-text: #f8fafc;
+        --shadow-paper: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html, body {
+        min-height: 100vh;
+        background-color: var(--app-bg);
+        color: var(--text-color);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        transition: background-color 0.2s ease;
+      }
+
+      /* Top App Bar & Controls */
+      .top-bar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background-color: var(--toolbar-bg);
+        border-bottom: 1px solid var(--toolbar-border);
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        padding: 0.625rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .brand-info {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+      }
+
+      .pdf-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.875rem;
+        height: 1.875rem;
+        background-color: #ef4444;
+        color: #ffffff;
+        border-radius: 4px;
+        font-size: 0.6875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .doc-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--toolbar-text);
+        line-height: 1.2;
+      }
+
+      .doc-subtitle {
+        font-size: 0.75rem;
+        color: #64748b;
+      }
+
+      .toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.375rem;
+        font-family: var(--font-sans);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.4375rem 0.875rem;
+        border-radius: 6px;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.15s ease;
+        text-decoration: none;
+      }
+
+      .btn-primary {
+        background-color: #2563eb;
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background-color: #1d4ed8;
+      }
+
+      .btn-secondary {
+        background-color: rgba(0,0,0,0.04);
+        color: var(--toolbar-text);
+        border-color: var(--border-color);
+      }
+
+      [data-theme="dark"] .btn-secondary {
+        background-color: rgba(255,255,255,0.05);
+      }
+
+      .btn-secondary:hover {
+        background-color: rgba(0,0,0,0.08);
+      }
+
+      [data-theme="dark"] .btn-secondary:hover {
+        background-color: rgba(255,255,255,0.1);
+      }
+
+      /* Document Viewport */
+      .doc-viewport {
+        padding: 2rem 1rem 4rem;
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+      }
+
+      /* Exact Document Paper Replica */
+      .resume-paper {
+        background-color: var(--paper-bg);
+        width: 100%;
+        max-width: 820px;
+        min-height: 1050px;
+        padding: 44px 50px;
+        box-shadow: var(--shadow-paper);
+        border-radius: 2px;
+        font-family: var(--font-serif);
+        color: var(--text-color);
+        line-height: 1.36;
+        font-size: 14px;
+        position: relative;
+        transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+      }
+
+      @media (max-width: 640px) {
+        .resume-paper {
+          padding: 24px 18px;
+          font-size: 13.5px;
+        }
+      }
+
+      .resume-paper a {
+        color: var(--link-color);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      .resume-paper a:hover {
+        color: var(--link-hover);
+      }
+
+      /* Header (Centered) */
+      .resume-header {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+
+      .person-name {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        margin-bottom: 3px;
+        color: var(--text-color);
+      }
+
+      .person-title {
+        font-size: 15px;
+        font-weight: 400;
+        margin-bottom: 2px;
+      }
+
+      .person-location {
+        font-size: 14px;
+        margin-bottom: 2px;
+      }
+
+      .person-contacts {
+        font-size: 13.5px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px 12px;
+        margin-bottom: 2px;
+      }
+
+      .person-linkedin {
+        font-size: 13.5px;
+      }
+
+      /* Section Headings */
+      .section {
+        margin-bottom: 15px;
+      }
+
+      .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--text-color);
+        letter-spacing: -0.01em;
+      }
+
+      /* Summary */
+      .summary-text {
+        text-align: justify;
+        font-size: 13.5px;
+        line-height: 1.45;
+      }
+
+      /* Experience */
+      .company-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+
+      .role-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 14px;
+        font-weight: 700;
+        margin-top: 5px;
+        margin-bottom: 4px;
+      }
+
+      .role-row.secondary-role {
+        margin-top: 10px;
+      }
+
+      .date-right {
+        font-weight: 400;
+        text-align: right;
+        white-space: nowrap;
+        font-size: 13.5px;
+      }
+
+      /* Bullet list */
+      .bullet-list {
+        list-style: none;
+        padding-left: 14px;
+        margin-bottom: 6px;
+      }
+
+      .bullet-list li {
+        position: relative;
+        margin-bottom: 4px;
+        line-height: 1.38;
+        font-size: 13.5px;
+        text-align: justify;
+      }
+
+      .bullet-list li::before {
+        content: "•";
+        position: absolute;
+        left: -14px;
+        top: 0;
+        font-size: 13px;
+      }
+
+      /* Skills */
+      .skill-row {
+        margin-bottom: 4px;
+        line-height: 1.4;
+        font-size: 13.5px;
+        text-align: justify;
+      }
+
+      .skill-row strong {
+        font-weight: 700;
+      }
+
+      /* Education */
+      .edu-block {
+        margin-bottom: 8px;
+      }
+
+      .edu-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      .edu-sub {
+        font-size: 13.5px;
+        font-weight: 400;
+      }
+
+      /* Languages */
+      .lang-row {
+        font-size: 13.5px;
+      }
+
+      /* Toast alert */
+      .toast-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999;
+      }
+
+      .toast {
+        background-color: #0f172a;
+        color: #ffffff;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: var(--font-sans);
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: all 0.2s ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Print Media */
+      @media print {
+        @page {
+          margin: 10mm 15mm 10mm 15mm;
+          size: A4 portrait;
+        }
+
+        body {
+          background: #ffffff !important;
+          color: #000000 !important;
+        }
+
+        .top-bar, .toast-container, .no-print {
+          display: none !important;
+        }
+
+        .doc-viewport {
+          padding: 0 !important;
+          margin: 0 !important;
+          display: block !important;
+        }
+
+        .resume-paper {
+          box-shadow: none !important;
+          border: none !important;
+          padding: 0 !important;
+          max-width: 100% !important;
+          width: 100% !important;
+          background: #ffffff !important;
+          color: #000000 !important;
+          font-size: 10.5pt !important;
+          line-height: 1.35 !important;
+        }
+
+        .person-name {
+          font-size: 18pt !important;
+          color: #000000 !important;
+        }
+
+        .section-title {
+          font-size: 11.5pt !important;
+          color: #000000 !important;
+        }
+
+        .resume-paper a {
+          color: #000000 !important;
+          text-decoration: none !important;
+        }
+
+        .bullet-list li, .summary-text, .skill-row, .edu-sub, .lang-row {
+          font-size: 10pt !important;
+        }
+      }
+    </style>
   </head>
   <body>
 
