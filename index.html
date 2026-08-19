@@ -11,9 +11,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- External Stylesheet -->
-    <link rel="stylesheet" href="./style.css">
-
     <!-- Embedded CSS for Instant Zero-Dependency Rendering -->
     <style>
       :root {
@@ -131,6 +128,7 @@
         border: 1px solid transparent;
         transition: all 0.15s ease;
         text-decoration: none;
+        user-select: none;
       }
 
       .btn-primary {
@@ -354,7 +352,7 @@
         position: fixed;
         bottom: 20px;
         right: 20px;
-        z-index: 999;
+        z-index: 9999;
       }
 
       .toast {
@@ -447,19 +445,19 @@
       </div>
 
       <div class="toolbar-actions">
-        <button id="btn-print" class="btn btn-primary" title="Print or save as PDF">
+        <button id="btn-print" class="btn btn-primary" onclick="window.printDoc()" title="Print or save as PDF">
           <span>🖨️ Print / Download PDF</span>
         </button>
-        <button id="btn-copy-text" class="btn btn-secondary" title="Copy plain text resume">
+        <button id="btn-copy-text" class="btn btn-secondary" onclick="window.copyResumeText()" title="Copy plain text resume">
           <span>📋 Copy Text</span>
         </button>
-        <button id="btn-copy-email" class="btn btn-secondary" title="Copy email address">
+        <button id="btn-copy-email" class="btn btn-secondary" onclick="window.copyEmail()" title="Copy email address">
           <span>✉️ Copy Email</span>
         </button>
-        <button id="btn-copy-phone" class="btn btn-secondary" title="Copy phone number">
+        <button id="btn-copy-phone" class="btn btn-secondary" onclick="window.copyPhone()" title="Copy phone number">
           <span>📞 Copy Phone</span>
         </button>
-        <button id="btn-toggle-theme" class="btn btn-secondary" title="Toggle dark/light mode">
+        <button id="btn-toggle-theme" class="btn btn-secondary" onclick="window.toggleThemeMode()" title="Toggle dark/light mode">
           <span id="theme-icon">🌙 Dark</span>
         </button>
       </div>
@@ -568,7 +566,123 @@
 
     </main>
 
-    <!-- Pure Vanilla JavaScript -->
-    <script src="./script.js"></script>
+    <!-- Embedded Vanilla JavaScript to guarantee 100% execution without adblocker or 404 issues -->
+    <script>
+      (function() {
+        'use strict';
+
+        const THEME_KEY = 'kp-pdf-theme';
+        const htmlEl = document.documentElement;
+
+        // --- Theme functions ---
+        window.setTheme = function(theme) {
+          if (theme === 'dark') {
+            htmlEl.setAttribute('data-theme', 'dark');
+            localStorage.setItem(THEME_KEY, 'dark');
+            updateThemeIcon(true);
+          } else {
+            htmlEl.removeAttribute('data-theme');
+            localStorage.setItem(THEME_KEY, 'light');
+            updateThemeIcon(false);
+          }
+        };
+
+        window.toggleThemeMode = function() {
+          const isDark = htmlEl.getAttribute('data-theme') === 'dark';
+          window.setTheme(isDark ? 'light' : 'dark');
+        };
+
+        function updateThemeIcon(isDark) {
+          const icon = document.getElementById('theme-icon');
+          if (icon) {
+            icon.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+          }
+        }
+
+        // --- Toast alert ---
+        window.showToast = function(message) {
+          let container = document.getElementById('toast-container');
+          if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+          }
+
+          const toast = document.createElement('div');
+          toast.className = 'toast';
+          toast.innerHTML = '<span>✓</span> <span>' + message + '</span>';
+          container.appendChild(toast);
+
+          requestAnimationFrame(function() {
+            toast.classList.add('show');
+          });
+
+          setTimeout(function() {
+            toast.classList.remove('show');
+            setTimeout(function() {
+              toast.remove();
+            }, 250);
+          }, 2400);
+        };
+
+        // --- Copy functions ---
+        window.copyText = function(text, successMsg) {
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(function() {
+              window.showToast(successMsg);
+            }).catch(function() {
+              fallbackCopy(text, successMsg);
+            });
+          } else {
+            fallbackCopy(text, successMsg);
+          }
+        };
+
+        function fallbackCopy(text, successMsg) {
+          const el = document.createElement('textarea');
+          el.value = text;
+          el.style.position = 'fixed';
+          el.style.left = '-9999px';
+          document.body.appendChild(el);
+          el.focus();
+          el.select();
+          try {
+            document.execCommand('copy');
+            window.showToast(successMsg);
+          } catch (e) {
+            console.error(e);
+          }
+          document.body.removeChild(el);
+        }
+
+        window.printDoc = function() {
+          window.print();
+        };
+
+        window.copyResumeText = function() {
+          const paper = document.getElementById('resume-paper');
+          const text = paper ? paper.innerText : '';
+          window.copyText(text, 'Full resume copied as plain text!');
+        };
+
+        window.copyEmail = function() {
+          window.copyText('me@kannikeshprabhu.in', 'Email copied: me@kannikeshprabhu.in');
+        };
+
+        window.copyPhone = function() {
+          window.copyText('+917259858227', 'Phone copied: +91 7259858227');
+        };
+
+        // Initial setup
+        const savedTheme = localStorage.getItem(THEME_KEY);
+        if (savedTheme) {
+          window.setTheme(savedTheme);
+        } else {
+          const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          window.setTheme(prefersDark ? 'dark' : 'light');
+        }
+      })();
+    </script>
   </body>
 </html>
